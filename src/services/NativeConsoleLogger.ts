@@ -2,8 +2,7 @@ import { ILogService } from "../interfaces";
 
 class NativeConsoleLogger implements ILogService {
   public log(data: any): void {
-    console.log("NativeConsoleLogger");
-    console.log(data);
+    console.dir(data, { depth: null });
   }
 
   public json(obj: object): void {

@@ -1,36 +1,55 @@
 import { isNode } from "./isNode";
-import { IHttpClient, ILogService } from "../interfaces";
+import { JiraService } from "../services";
 import { InjectionContainer } from "../services/InjectionContainer";
+import { IEncodingService, IHttpClient, IJiraService, ILogService } from "../interfaces";
 
-enum ServicesTokens {
-  LogService,
-  IHttpClient,
-}
+type ServicesTokens = (
+  "ILogService" |
+  "IHttpClient" |
+  "IEncodingService" |
+  "IJiraService"
+)
 
 async function getInjectionContainer(): Promise<
   InjectionContainer<ServicesTokens>
 > {
   const sharedInjectionContainer = new InjectionContainer<ServicesTokens>();
 
+  sharedInjectionContainer.register<IJiraService>(
+    "IJiraService",
+    JiraService
+  );
+
   if (isNode()) {
-    const { AxiosHttpService, NativeConsoleLogger } = await import(
-      "../services/for-node-modules"
-    );
+    const {
+      AxiosHttpService,
+      NativeConsoleLogger,
+      NativeEncodingService,
+    } = await import("../services/for-node-modules");
 
     sharedInjectionContainer
-      .register<IHttpClient>(ServicesTokens.IHttpClient, AxiosHttpService)
-      .register<ILogService>(ServicesTokens.LogService, NativeConsoleLogger);
+      .register<IHttpClient>("IHttpClient", AxiosHttpService)
+      .register<ILogService>("ILogService", NativeConsoleLogger)
+      .register<IEncodingService>("IEncodingService", NativeEncodingService);
   } else {
-    const { GoogleScriptsHttpClient, GoogleScriptsLogger } = await import(
+    const {
+      GoogleScriptsLogger,
+      GoogleScriptsHttpClient,
+      GoogleScriptsEncodingService,
+    } = await import(
       "../services/for-google-modules"
     );
 
     sharedInjectionContainer
       .register<IHttpClient>(
-        ServicesTokens.IHttpClient,
+        "IHttpClient",
         GoogleScriptsHttpClient
       )
-      .register<ILogService>(ServicesTokens.LogService, GoogleScriptsLogger);
+      .register<IEncodingService>(
+        "IEncodingService",
+        GoogleScriptsEncodingService,
+      )
+      .register<ILogService>("ILogService", GoogleScriptsLogger);
   }
 
   return sharedInjectionContainer;

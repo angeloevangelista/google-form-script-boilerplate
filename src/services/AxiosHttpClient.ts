@@ -76,9 +76,8 @@ class AxiosHttpClient implements IHttpClient {
     options?: RequestOptions | undefined
   ): Promise<RequestResult<T>> {
     try {
-      const response = await this._apiInstance.post<T>(url, {
+      const response = await this._apiInstance.post<T>(url, options?.body, {
         headers: options?.headers,
-        data: options?.body,
         params: options?.queryParams,
       });
 
@@ -113,9 +112,8 @@ class AxiosHttpClient implements IHttpClient {
     options?: RequestOptions | undefined
   ): Promise<RequestResult<T>> {
     try {
-      const response = await this._apiInstance.put<T>(url, {
+      const response = await this._apiInstance.put<T>(url, options?.body, {
         headers: options?.headers,
-        data: options?.body,
         params: options?.queryParams,
       });
 
@@ -187,8 +185,8 @@ class AxiosHttpClient implements IHttpClient {
   ): Promise<RequestResult<T>> {
     const rejectObject: RequestResult<T> = {
       statusCode: error.response?.status || 500,
-      data: error.response?.data,
-      message: error.response?.statusText,
+      data: error.response?.status === 400 ? undefined : error.response?.data,
+      message: error.response?.statusText || JSON.stringify(error),
       responseHeaders: Object.entries(error.response?.headers || {}).reduce(
         (acc, [key, value]) => ({ ...acc, [key]: value }),
         {}

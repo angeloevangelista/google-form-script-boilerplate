@@ -2,8 +2,7 @@ import { ILogService } from "../interfaces";
 
 class GoogleScriptsLogger implements ILogService {
   public log(data: any): void {
-    Logger.log("GoogleScriptsLogger");
-    Logger.log(data);
+    Logger.log(JSON.stringify(data));
   }
 
   public json(obj: object): void {

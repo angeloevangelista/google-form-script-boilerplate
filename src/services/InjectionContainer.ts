@@ -8,31 +8,37 @@ type RegisterOutput<ServiceTokenDefinition> = {
 };
 
 class InjectionContainer<ServiceTokenDefinition> {
-  private _services: Map<string, Constructable> = new Map();
+  private _services: Map<ServiceTokenDefinition, Constructable> = new Map();
 
   public register<T>(
     token: ServiceTokenDefinition,
     service: Constructable<T>
   ): RegisterOutput<ServiceTokenDefinition> {
-    const tokenKey = String(token);
-
-    this._services.set(tokenKey, service);
+    this._services.set(token, service);
 
     return {
       register: this.register.bind(this),
     };
   }
 
-  public get<T>(token: ServiceTokenDefinition, ...params: any[]): T {
-    const tokenKey = String(token);
-
-    if (!this._services.has(tokenKey)) {
-      throw new Error(`Service ${tokenKey} not registered`);
+  /**
+   *
+   * @param token The tokenService to provide
+   * @returns An instance of the service, if already registered,
+   *          and provides it the current instance of the InjectionContainer
+   *          as first argument of the constructor
+   */
+  public get<T/*, ParamsType = never*/>(
+    token: ServiceTokenDefinition,
+    // params?: ParamsType,
+  ): T {
+    if (!this._services.has(token)) {
+      throw new Error(`Service ${token} not registered`);
     }
 
-    const service = this._services.get(tokenKey) as Constructable<T>;
+    const ServiceConstructor = this._services.get(token) as Constructable<T>;
 
-    return new service(...params);
+    return new ServiceConstructor(this);
   }
 }
 
