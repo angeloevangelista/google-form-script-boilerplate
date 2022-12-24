@@ -34,17 +34,7 @@ global.debugFunction = async () => {
     }
   });
 
-  if (!createIssueResult.ok) {
-    logService.log(createIssueResult.error);
-    process.exit(1);
-  }
-
   const deleteIssueResult = await jiraService.deleteIssue(createIssueResult.data!.key)
-
-  if (!deleteIssueResult.ok) {
-    logService.log(deleteIssueResult);
-    process.exit(1);
-  }
 
   return;
 };
