@@ -14,6 +14,11 @@ class AxiosHttpClient implements IHttpClient {
   constructor(baseUrl?: string) {
     this._apiInstance = axios.create({
       baseURL: baseUrl,
+      headers: {
+        common: {
+          'accept-encoding': '*'
+        }
+      }
     });
   }
 

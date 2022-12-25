@@ -7,34 +7,9 @@ global.debugFunction = async () => {
   const logService = injectionContainer.get<ILogService>("ILogService");
   const jiraService = injectionContainer.get<IJiraService>("IJiraService");
 
-  const createIssueResult = await jiraService.createIssue({
-    fields: {
-      summary: "Summary",
-      project: {
-        key: "PDT"
-      },
-      issuetype: {
-        name: "Task"
-      },
-      description: {
-        type: "doc",
-        version: 1,
-        content: [
-          {
-            type: "paragraph",
-            content: [
-              {
-                type: "text",
-                text: "Paragraph content"
-              }
-            ]
-          }
-        ]
-      }
-    }
-  });
+  const userResponse = await jiraService.getUsersByEmail("angeloevan.ane@gmail.com")
 
-  const deleteIssueResult = await jiraService.deleteIssue(createIssueResult.data!.key)
+  logService.log(userResponse)
 
   return;
 };

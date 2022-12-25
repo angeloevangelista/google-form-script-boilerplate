@@ -6,6 +6,7 @@ import { IJiraService } from "../interfaces/jira-service";
 import {
   CreateIssueParams,
   CreateIssueResponse,
+  GetJiraUserResponse,
   JiraError,
   JiraServiceResult,
 } from "jira-service-types";
@@ -65,6 +66,29 @@ class JiraService implements IJiraService {
         ok: true,
         error: undefined,
         data: undefined,
+      }
+
+      return result
+    } catch (error: any) {
+      return this._handleError(error);
+    }
+  }
+
+  public async getUsersByEmail(userEmail: string): Promise<JiraServiceResult<GetJiraUserResponse[]>> {
+    try {
+      const getUserResponse = await this._httpClient.get<GetJiraUserResponse[]>(
+        `/user/search`,
+        {
+          queryParams: {
+            query: userEmail
+          }
+        }
+      );
+
+      const result: JiraServiceResult<GetJiraUserResponse[]> = {
+        ok: true,
+        data: getUserResponse.data,
+        error: undefined,
       }
 
       return result

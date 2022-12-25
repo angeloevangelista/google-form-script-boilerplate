@@ -68,4 +68,16 @@ declare module "jira-service-types" {
     key: string;
     self: string;
   };
+
+  export interface GetJiraUserResponse {
+    self: string;
+    accountId: string;
+    accountType: string;
+    emailAddress: string;
+    avatarUrls: { [key: string]: string };
+    displayName: string;
+    active: boolean;
+    timeZone: string;
+    locale: string;
+  }
 }
