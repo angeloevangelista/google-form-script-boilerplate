@@ -1,4 +1,5 @@
 import {
+  AddUserAsWatcherParams,
   CreateIssueParams,
   CreateIssueResponse,
   GetJiraUserResponse,
@@ -12,9 +13,11 @@ type IJiraService = {
   getUsersByEmail: (userEmail: string) =>
     Promise<JiraServiceResult<GetJiraUserResponse[]>>;
 
+  addUserAsWatcher: (addUserAsWatcherParams: AddUserAsWatcherParams) =>
+    Promise<JiraServiceResult<undefined>>;
+
   deleteIssue: (issueKey: string) => Promise<JiraServiceResult<undefined>>;
 
-  // addUserAsWatcher: Promise<void>;
   // getIssue: Promise<void>;
   // addDescriptionParagraphs: Promise<void>;
 };

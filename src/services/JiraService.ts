@@ -4,6 +4,7 @@ import { IEncodingService, IHttpClient } from "../interfaces";
 
 import { IJiraService } from "../interfaces/jira-service";
 import {
+  AddUserAsWatcherParams,
   CreateIssueParams,
   CreateIssueResponse,
   GetJiraUserResponse,
@@ -89,6 +90,30 @@ class JiraService implements IJiraService {
         ok: true,
         data: getUserResponse.data,
         error: undefined,
+      }
+
+      return result
+    } catch (error: any) {
+      return this._handleError(error);
+    }
+  }
+
+  public async addUserAsWatcher({ accountId, issueKey }: AddUserAsWatcherParams) {
+    try {
+      await this._httpClient.post<CreateIssueResponse>(
+        `/issue/${issueKey}/watchers`,
+        {
+          body: accountId,
+          headers: {
+            "Content-Type": "application/json",
+          }
+        }
+      );
+
+      const result: JiraServiceResult<undefined> = {
+        ok: true,
+        error: undefined,
+        data: undefined,
       }
 
       return result

@@ -190,7 +190,7 @@ class AxiosHttpClient implements IHttpClient {
   ): Promise<RequestResult<T>> {
     const rejectObject: RequestResult<T> = {
       statusCode: error.response?.status || 500,
-      data: error.response?.status === 400 ? undefined : error.response?.data,
+      data: error.response?.status === 404 ? undefined : error.response?.data,
       message: error.response?.statusText || JSON.stringify(error),
       responseHeaders: Object.entries(error.response?.headers || {}).reduce(
         (acc, [key, value]) => ({ ...acc, [key]: value }),

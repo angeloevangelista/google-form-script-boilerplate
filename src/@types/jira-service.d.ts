@@ -69,6 +69,11 @@ declare module "jira-service-types" {
     self: string;
   };
 
+  export type AddUserAsWatcherParams = {
+    accountId: string;
+    issueKey: string;
+  };
+
   export interface GetJiraUserResponse {
     self: string;
     accountId: string;

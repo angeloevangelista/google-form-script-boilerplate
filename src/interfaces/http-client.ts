@@ -2,7 +2,7 @@ import { Dictionary } from "../utils/types";
 
 type RequestOptions = {
   queryParams?: Dictionary<string>;
-  body?: object;
+  body?: any;
   headers?: Dictionary<string>;
 };
 
