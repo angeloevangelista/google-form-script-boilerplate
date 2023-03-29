@@ -1,0 +1,4 @@
+{
+  "scriptId": "<GAS_APP_ID>",
+  "rootDir": "./dist"
+}

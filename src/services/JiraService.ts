@@ -8,8 +8,12 @@ import {
   CreateIssueParams,
   CreateIssueResponse,
   GetJiraUserResponse,
+  IssueFields,
   JiraError,
   JiraServiceResult,
+  CustomFieldType,
+  Issuetype,
+  IssueDescriptionContent,
 } from "jira-service-types";
 
 class JiraService implements IJiraService {
@@ -21,35 +25,31 @@ class JiraService implements IJiraService {
     this._encodingService = this._injectionContainer.get("IEncodingService");
 
     this._httpClient.setBaseUrl(
-      "https://angeloevangelista.atlassian.net/rest/api/3"
+      `https://${global.applicationConfig.jira.workspace}.atlassian.net/rest/api/3`
     );
 
-    const username = "ta_procurando_o_que_aqui?";
-    const password = "hoje_nao_amigao";
+    const { user, token } = global.applicationConfig.jira;
 
-    const encodedToken = this._encodingService.toBase64(`${username}:${password}`)
+    const encodedToken = this._encodingService.toBase64(`${user}:${token}`);
 
     this._httpClient.setDefaultHeaders({
       Authorization: `Basic ${encodedToken}`,
-    })
+    });
   }
 
-  public async createIssue(
-    createIssueParams: CreateIssueParams,
-  ): Promise<JiraServiceResult<CreateIssueResponse>> {
+  public async getIssue(
+    projectKey: string
+  ): Promise<JiraServiceResult<CreateIssueParams>> {
     try {
-      const createIssueResponse = await this._httpClient.post<CreateIssueResponse>(
-        "/issue",
-        {
-          body: createIssueParams,
-        },
+      const getIssueResponse = await this._httpClient.get<CreateIssueParams>(
+        `/issue/${projectKey}`
       );
 
-      const result: JiraServiceResult<CreateIssueResponse> = {
+      const result: JiraServiceResult<CreateIssueParams> = {
         ok: true,
         error: undefined,
-        data: createIssueResponse.data,
-      }
+        data: getIssueResponse.data,
+      };
 
       return result;
     } catch (error: any) {
@@ -57,32 +57,55 @@ class JiraService implements IJiraService {
     }
   }
 
-  public async deleteIssue(issueKey: string): Promise<JiraServiceResult<undefined>> {
+  public async createIssue(
+    createIssueParams: CreateIssueParams
+  ): Promise<JiraServiceResult<CreateIssueResponse>> {
     try {
-      await this._httpClient.delete<CreateIssueResponse>(
-        `/issue/${issueKey}`,
-      );
+      const createIssueResponse =
+        await this._httpClient.post<CreateIssueResponse>("/issue", {
+          body: createIssueParams,
+        });
 
-      const result: JiraServiceResult<undefined> = {
+      const result: JiraServiceResult<CreateIssueResponse> = {
         ok: true,
         error: undefined,
-        data: undefined,
-      }
+        data: createIssueResponse.data,
+      };
 
-      return result
+      return result;
     } catch (error: any) {
       return this._handleError(error);
     }
   }
 
-  public async getUsersByEmail(userEmail: string): Promise<JiraServiceResult<GetJiraUserResponse[]>> {
+  public async deleteIssue(
+    issueKey: string
+  ): Promise<JiraServiceResult<undefined>> {
+    try {
+      await this._httpClient.delete<CreateIssueResponse>(`/issue/${issueKey}`);
+
+      const result: JiraServiceResult<undefined> = {
+        ok: true,
+        error: undefined,
+        data: undefined,
+      };
+
+      return result;
+    } catch (error: any) {
+      return this._handleError(error);
+    }
+  }
+
+  public async getUsersByEmail(
+    userEmail: string
+  ): Promise<JiraServiceResult<GetJiraUserResponse[]>> {
     try {
       const getUserResponse = await this._httpClient.get<GetJiraUserResponse[]>(
         `/user/search`,
         {
           queryParams: {
-            query: userEmail
-          }
+            query: userEmail,
+          },
         }
       );
 
@@ -90,15 +113,18 @@ class JiraService implements IJiraService {
         ok: true,
         data: getUserResponse.data,
         error: undefined,
-      }
+      };
 
-      return result
+      return result;
     } catch (error: any) {
       return this._handleError(error);
     }
   }
 
-  public async addUserAsWatcher({ accountId, issueKey }: AddUserAsWatcherParams) {
+  public async addUserAsWatcher({
+    accountId,
+    issueKey,
+  }: AddUserAsWatcherParams) {
     try {
       await this._httpClient.post<CreateIssueResponse>(
         `/issue/${issueKey}/watchers`,
@@ -106,7 +132,7 @@ class JiraService implements IJiraService {
           body: accountId,
           headers: {
             "Content-Type": "application/json",
-          }
+          },
         }
       );
 
@@ -114,9 +140,9 @@ class JiraService implements IJiraService {
         ok: true,
         error: undefined,
         data: undefined,
-      }
+      };
 
-      return result
+      return result;
     } catch (error: any) {
       return this._handleError(error);
     }
@@ -126,171 +152,220 @@ class JiraService implements IJiraService {
     let jiraError: JiraError | undefined;
 
     if ((<any>error).data && (<any>error).statusCode !== 404) {
-      jiraError = (<any>error).data
+      jiraError = (<any>error).data;
     }
 
     return {
       ok: false,
       error: jiraError || {
-        errorMessages: [], errors: {
-          unexpectedError: error
-        }
+        errorMessages: [],
+        errors: {
+          unexpectedError: error,
+        },
       },
-    }
+    };
   }
 }
 
-export { JiraService }
+class IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
+  private _issueKey: string | undefined;
+  private _fieldsObject: IssueFields;
 
-// // import config from '../config';
+  constructor(fieldsObject?: IssueFields) {
+    this._fieldsObject = {
+      description: {
+        type: "doc",
+        version: 1,
+        content: [],
+      },
+      components: [],
+      ...fieldsObject,
+    } as IssueFields;
+  }
 
-// // import { JiraApiServiceTypes } from '../types';
-// // import LogService from './log-service';
-// // import { DescriptionParagraph, FieldsObject } from '../util/createFieldsObject';
-// // import createDescriptionContentFromDescriptionParagraphs from '../util/createDescriptionContentFromDescriptionParagraphs';
+  public get issueKey(): string | undefined {
+    return this._issueKey;
+  }
 
-// class JiraService {
-//   private static _getHeaders() {
-//     const basicToken = Utilities.base64Encode(
-//       `${config.email.service}:${config.jira.token}`
-//     );
+  public getFieldsObject(): IssueFields {
+    return this._fieldsObject;
+  }
 
-//     return {
-//       "content-type": "application/json",
-//       Accept: "application/json",
-//       authorization: `Basic ${basicToken}`,
-//     };
-//   }
+  public getCustomField<TCustomFieldType>(
+    customField: TCustomFieldsMap
+  ): TCustomFieldType {
+    return this._fieldsObject[
+      `customfield_${Number(customField)}`
+    ] as TCustomFieldType;
+  }
 
-//   public static createIssue(fields: FieldsObject): string {
-//     const createIssuePayload = { fields };
+  public setIssueKey(
+    issueKey: string
+  ): IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
+    this._issueKey = issueKey;
 
-//     LogService.log(JSON.stringify(createIssuePayload, null, 2));
+    return this;
+  }
 
-//     const createIssueResponse = UrlFetchApp.fetch(
-//       `${config.jira.baseUrl}/issue`,
-//       {
-//         method: "post",
-//         contentType: "application/json",
-//         headers: this._getHeaders(),
-//         payload: JSON.stringify(createIssuePayload),
-//       }
-//     ).getContentText();
+  public setCustomField(
+    customField: TCustomFieldsMap,
+    value: CustomFieldType
+  ): IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
+    this._fieldsObject[`customfield_${Number(customField)}`] = value;
 
-//     LogService.log(createIssueResponse);
+    return this;
+  }
 
-//     const { key: issueKey } = JSON.parse(createIssueResponse);
+  public setProject(
+    projectKey: string
+  ): IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
+    this._fieldsObject.project = {
+      key: projectKey,
+    };
 
-//     return issueKey;
-//   }
+    return this;
+  }
 
-//   public static deleteIssue(issueKey: string) {
-//     UrlFetchApp.fetch(`${config.jira.baseUrl}/issue/${issueKey}`, {
-//       method: "delete",
-//       contentType: "application/json",
-//       headers: this._getHeaders(),
-//     }).getContentText();
-//   }
+  public setIssueType(
+    issueTypeName: TIssueType
+  ): IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
+    this._fieldsObject.issuetype = {
+      name: String(issueTypeName),
+    };
 
-//   private static _getUserByEmail(
-//     email: string
-//   ): JiraApiServiceTypes.JiraUser | undefined {
-//     const getUserResponse = UrlFetchApp.fetch(
-//       `${config.jira.baseUrl}/user/search?query=${email}`,
-//       {
-//         method: "get",
-//         contentType: "application/json",
-//         headers: this._getHeaders(),
-//       }
-//     ).getContentText();
+    return this;
+  }
 
-//     const userCollection = JSON.parse(
-//       getUserResponse
-//     ) as JiraApiServiceTypes.JiraUser[];
+  public setSummary(
+    summary: string
+  ): IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
+    this._fieldsObject.summary = summary;
 
-//     return [...userCollection].pop();
-//   }
+    return this;
+  }
 
-//   public static addUserAsWatcher(userEmail: string, issueKey: string) {
-//     try {
-//       const user = this._getUserByEmail(userEmail);
+  public addComponent(
+    componentName: string
+  ): IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
+    if (!this._fieldsObject.components) {
+    }
 
-//       if (user)
-//         UrlFetchApp.fetch(`${config.jira.baseUrl}/issue/${issueKey}/watchers`, {
-//           method: "post",
-//           headers: this._getHeaders(),
-//           payload: `"${user.accountId}"`,
-//         }).getContentText();
-//     } catch (error) {
-//       LogService.log(JSON.stringify(error, null, 2));
-//     }
-//   }
+    this._fieldsObject.components?.push({
+      name: componentName,
+    });
 
-//   public static getIssue(issueKey: string) {
-//     try {
-//       const getIssueResponse = UrlFetchApp.fetch(
-//         `${config.jira.baseUrl}/issue/${issueKey}`,
-//         {
-//           method: "get",
-//           contentType: "application/json",
-//           headers: this._getHeaders(),
-//         }
-//       ).getContentText();
+    return this;
+  }
 
-//       const issue = JSON.parse(
-//         getIssueResponse
-//       ) as JiraApiServiceTypes.JiraIssue;
+  public setComponents(
+    ...componentsNames: string[]
+  ): IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
+    if (!this._fieldsObject.components) {
+    }
 
-//       return issue;
-//     } catch (error) {
-//       LogService.log(JSON.stringify(error, null, 2));
+    this._fieldsObject.components = componentsNames.map((componentName) => ({
+      name: componentName,
+    }));
 
-//       return null;
-//     }
-//   }
+    return this;
+  }
 
-//   public static addDescriptionParagraphs(
-//     issueKey: string,
-//     descriptionParagraphs: DescriptionParagraph[]
-//   ) {
-//     try {
-//       const issue = this.getIssue(issueKey);
+  public openDescriptionParagraph(): IssueDescriptionParagraphHandler<
+    TCustomFieldsMap,
+    TIssueType
+  > {
+    return new IssueDescriptionParagraphHandler<TCustomFieldsMap, TIssueType>(
+      this
+    );
+  }
 
-//       if (!issue) return { success: false };
+  public addDescriptionRuler(): IssueFieldsHandler<
+    TCustomFieldsMap,
+    TIssueType
+  > {
+    this._fieldsObject.description.content.push({
+      type: "rule",
+    });
 
-//       const currentDescriptionContentCollection =
-//         issue.fields.description.content;
+    return this;
+  }
 
-//       const updateIssuePayload = {
-//         fields: {
-//           description: {
-//             type: "doc",
-//             version: 1,
-//             content: [
-//               ...currentDescriptionContentCollection,
-//               ...createDescriptionContentFromDescriptionParagraphs(
-//                 descriptionParagraphs
-//               ),
-//             ],
-//           },
-//         },
-//       };
+  /** ❌ Do not use this, it for internal usage only */
+  public _addDescriptionContent(content: IssueDescriptionContent) {
+    this._fieldsObject.description.content.push(content);
+  }
+}
 
-//       LogService.log(JSON.stringify(updateIssuePayload, null, 2));
+class IssueDescriptionParagraphHandler<TCustomFieldsMap, TIssueType> {
+  private _issueFieldsHandler: IssueFieldsHandler<TCustomFieldsMap, TIssueType>;
+  private _issueDescriptionContent: IssueDescriptionContent;
 
-//       UrlFetchApp.fetch(`${config.jira.baseUrl}/issue/${issueKey}`, {
-//         method: "put",
-//         headers: this._getHeaders(),
-//         payload: JSON.stringify(updateIssuePayload),
-//       }).getContentText();
+  constructor(
+    issueFieldsHandler: IssueFieldsHandler<TCustomFieldsMap, TIssueType>
+  ) {
+    this._issueFieldsHandler = issueFieldsHandler;
 
-//       return { success: true };
-//     } catch (error) {
-//       LogService.log(JSON.stringify(error, null, 2));
+    this._issueDescriptionContent = {
+      type: "paragraph",
+      content: [],
+    };
+  }
 
-//       return { success: false };
-//     }
-//   }
-// }
+  public closeParagraph(): IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
+    this._issueFieldsHandler._addDescriptionContent(
+      this._issueDescriptionContent
+    );
 
-// export { JiraService };
+    return this._issueFieldsHandler;
+  }
+
+  public addItalicText(
+    text: string
+  ): IssueDescriptionParagraphHandler<TCustomFieldsMap, TIssueType> {
+    this._issueDescriptionContent.content?.push({
+      text: text || " ",
+      type: "text",
+      marks: [{ type: "em" }],
+    });
+
+    return this;
+  }
+
+  public addBoldText(
+    text: string
+  ): IssueDescriptionParagraphHandler<TCustomFieldsMap, TIssueType> {
+    this._issueDescriptionContent.content?.push({
+      text: text || " ",
+      type: "text",
+      marks: [{ type: "strong" }],
+    });
+
+    return this;
+  }
+
+  public addLink(
+    text: string,
+    url: string
+  ): IssueDescriptionParagraphHandler<TCustomFieldsMap, TIssueType> {
+    this._issueDescriptionContent.content?.push({
+      text: text || " ",
+      type: "text",
+      marks: [{ type: "link", attrs: { href: url || " " } }],
+    });
+
+    return this;
+  }
+
+  public addNormalText(
+    text: string
+  ): IssueDescriptionParagraphHandler<TCustomFieldsMap, TIssueType> {
+    this._issueDescriptionContent.content?.push({
+      text: text || " ",
+      type: "text",
+    });
+
+    return this;
+  }
+}
+
+export { JiraService, IssueFieldsHandler };

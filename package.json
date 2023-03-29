@@ -5,9 +5,15 @@
   "license": "MIT",
   "scripts": {
     "dev": "ts-node --files ./src/index.ts",
-    "build": "webpack --mode production",
-    "push": "yarn build && clasp push",
+    "build": "yarn build:webpack && cp ./appsscript.json ./dist && cp ./config.json ./dist/CONFIG.html",
+    "build:webpack": "webpack --mode production",
+    "push": "clasp push --force",
     "lint": "eslint --ignore-path .eslintignore --ext .js,.ts ."
+  },
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false
   },
   "devDependencies": {
     "@google/clasp": "^2.4.2",

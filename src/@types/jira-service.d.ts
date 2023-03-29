@@ -1,5 +1,6 @@
 declare module "jira-service-types" {
   export type CreateIssueParams = {
+    key?: string;
     fields: IssueFields;
   };
 
@@ -7,18 +8,18 @@ declare module "jira-service-types" {
     ok: boolean;
     data?: T;
     error?: JiraError;
-  }
+  };
 
   export type JiraError = {
-    errorMessages: [],
-    errors: { [key: string]: string, unexpectedError?: any }
-  }
+    errorMessages: [];
+    errors: { [key: string]: string; unexpectedError?: any };
+  };
 
   export type CustomFieldType =
     | string
     | {
-      value: string;
-    };
+        value: string;
+      };
 
   export type IssueFields = {
     summary: string;
@@ -26,6 +27,7 @@ declare module "jira-service-types" {
     components?: Issuetype[];
     issuetype: Issuetype;
     description: IssueDescription;
+    status: IssueStatus;
     [key: `customfield_${number}`]: CustomFieldType;
   };
 
@@ -41,6 +43,12 @@ declare module "jira-service-types" {
     type: string;
     version: number;
     content: IssueDescriptionContent[];
+  };
+
+  export type IssueStatus = {
+    description: string;
+    name: string;
+    id: string;
   };
 
   export type IssueDescriptionContent = {
@@ -61,6 +69,9 @@ declare module "jira-service-types" {
 
   export type IssueDescriptionContentMark = {
     type: string;
+    attrs?: {
+      href: string;
+    };
   };
 
   export type CreateIssueResponse = {

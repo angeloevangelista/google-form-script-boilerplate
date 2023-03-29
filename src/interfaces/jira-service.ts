@@ -6,20 +6,22 @@ import {
   JiraServiceResult,
 } from "jira-service-types";
 
-type IJiraService = {
-  createIssue: (createIssueParams: CreateIssueParams) =>
-    Promise<JiraServiceResult<CreateIssueResponse>>;
+interface IJiraService {
+  getIssue: (issueKey: string) => Promise<JiraServiceResult<CreateIssueParams>>;
 
-  getUsersByEmail: (userEmail: string) =>
-    Promise<JiraServiceResult<GetJiraUserResponse[]>>;
+  createIssue: (
+    createIssueParams: CreateIssueParams
+  ) => Promise<JiraServiceResult<CreateIssueResponse>>;
 
-  addUserAsWatcher: (addUserAsWatcherParams: AddUserAsWatcherParams) =>
-    Promise<JiraServiceResult<undefined>>;
+  getUsersByEmail: (
+    userEmail: string
+  ) => Promise<JiraServiceResult<GetJiraUserResponse[]>>;
+
+  addUserAsWatcher: (
+    addUserAsWatcherParams: AddUserAsWatcherParams
+  ) => Promise<JiraServiceResult<undefined>>;
 
   deleteIssue: (issueKey: string) => Promise<JiraServiceResult<undefined>>;
-
-  // getIssue: Promise<void>;
-  // addDescriptionParagraphs: Promise<void>;
-};
+}
 
 export { IJiraService };

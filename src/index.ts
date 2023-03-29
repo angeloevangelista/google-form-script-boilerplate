@@ -1,28 +1,43 @@
-import { IJiraService, ILogService } from "./interfaces";
-import { getInjectionContainer, isNode } from "./utils";
+import { mapEventData } from "./form-handler";
+import { ILogService } from "./interfaces";
+import { getInjectionContainer, isNode, loadApplicationConfig } from "./utils";
 
-global.debugFunction = async () => {
-  const injectionContainer = await getInjectionContainer();
+loadApplicationConfig().then(() => {
+  if (isNode()) {
+    global.debugFunction();
+  }
+});
 
-  const logService = injectionContainer.get<ILogService>("ILogService");
-  const jiraService = injectionContainer.get<IJiraService>("IJiraService");
+global.handleFormSubmit = async (submitEvent) => {
+  let logService: ILogService | undefined;
 
-  const deleteResponse = await jiraService.deleteIssue('PDT-33')
+  try {
+    const injectionContainer = await getInjectionContainer();
+    logService = injectionContainer.get<ILogService>("ILogService");
 
-  logService.log(deleteResponse);
+    const formData = mapEventData(submitEvent);
 
-  // const { data: users } = await jiraService.getUsersByEmail("angeloevan.ane@gmail.com")
+    logService.json({
+      formData,
+      applicationConfig: global.applicationConfig,
+    });
+  } catch (error: any) {
+    logService?.log(error.message);
 
-  // const createUserResponse = await jiraService.addUserAsWatcher({
-  //   accountId: users!.at(0)!.accountId,
-  //   issueKey: 'PDT-33',
-  // })
-
-  // logService.log(createUserResponse)
-
-  return;
+    throw new Error(error.message);
+  }
 };
 
-if (isNode()) {
-  global.debugFunction();
-}
+global.debugFunction = async () => {
+  const valuesCsvLine = ``;
+
+  const namedValues: { [key: string]: string[] } = {
+    "Question One": ["Very nice answer"],
+  };
+
+  const submitEvent = {
+    values: valuesCsvLine.split(","),
+    namedValues,
+  } as GoogleAppsScript.Events.SheetsOnFormSubmit;
+  global.handleFormSubmit(submitEvent);
+};
