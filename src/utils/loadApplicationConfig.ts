@@ -1,4 +1,4 @@
-import { isNode } from ".";
+import { isNode, tryParse } from ".";
 import { ApplicationConfig } from "../@types/global";
 import { include } from "../gas";
 
@@ -9,9 +9,26 @@ async function loadApplicationConfig() {
       return;
     }
 
-    const configFile = await import("../../config.json");
+    const [{ readFileSync }, { resolve }] = await Promise.all([
+      import("fs"),
+      import("path"),
+    ]);
 
-    global.applicationConfig = (<any>configFile.default) as ApplicationConfig;
+    const configFileBuffer = readFileSync(
+      resolve(__dirname, "..", "..", "config.json")
+    );
+
+    const {
+      error,
+      success,
+      value: applicationConfig,
+    } = tryParse<ApplicationConfig>(configFileBuffer.toString());
+
+    if (!success) {
+      throw error;
+    }
+
+    global.applicationConfig = applicationConfig!;
   } catch (error: any) {
     const logger = global.Logger || global.console;
 
