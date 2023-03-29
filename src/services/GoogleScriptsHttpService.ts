@@ -34,13 +34,13 @@ class GoogleScriptsHttpClient implements IHttpClient {
 
   public async get<T>(
     url: string,
-    options: RequestOptions
+    options?: RequestOptions
   ): Promise<RequestResult<T>> {
     let response: GoogleAppsScript.URL_Fetch.HTTPResponse | undefined;
 
     url = this._baseUrl ? this._baseUrl + url : url;
 
-    if (options.queryParams) {
+    if (options?.queryParams) {
       url += "?" + formatQueryParams(options.queryParams);
     }
 
