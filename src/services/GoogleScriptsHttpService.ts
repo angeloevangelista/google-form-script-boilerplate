@@ -1,6 +1,7 @@
 import { Dictionary } from "../utils/types";
-import { formatQueryParams, tryParse } from "../utils";
+import { formatQueryParams, ServicesTokens, tryParse } from "../utils";
 import { IHttpClient, RequestOptions, RequestResult } from "../interfaces";
+import { InjectionContainer } from "./InjectionContainer";
 
 class GoogleScriptsHttpClient implements IHttpClient {
   private _baseUrl?: string;
@@ -12,7 +13,10 @@ class GoogleScriptsHttpClient implements IHttpClient {
    *
    * @param baseUrl Url will be used as prefix in all requests
    */
-  constructor(baseUrl?: string) {
+  constructor(
+    private _injectionContainer: InjectionContainer<ServicesTokens>,
+    baseUrl?: string
+  ) {
     if (baseUrl) this._baseUrl = baseUrl;
   }
 
@@ -77,25 +81,13 @@ class GoogleScriptsHttpClient implements IHttpClient {
 
     const responseTextContent = response.getContentText();
 
-    const {
-      success: parseSuccess,
-      value: parsedResponse,
-      error: parseError,
-    } = tryParse<T>(responseTextContent);
+    const { success: parseSuccess, value: parsedResponse } =
+      tryParse<T>(responseTextContent);
 
-    if (!parseSuccess) {
-      const rejectObject: RequestResult<T> = {
-        data: undefined,
-        message: parseError?.message,
-        responseHeaders: responseHeaders,
-        statusCode: response.getResponseCode(),
-      };
-
-      return Promise.reject(rejectObject);
-    }
+    const responseData = parseSuccess ? parsedResponse : responseTextContent;
 
     return {
-      data: parsedResponse,
+      data: responseData as T,
       message: "ok",
       responseHeaders: responseHeaders,
       statusCode: response.getResponseCode(),

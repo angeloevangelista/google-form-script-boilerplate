@@ -1,8 +1,10 @@
 import axios, { AxiosInstance, AxiosError } from "axios";
 
 import { IHttpClient, RequestOptions, RequestResult } from "../interfaces";
+import { ServicesTokens } from "../utils";
 
 import { Dictionary } from "../utils/types";
+import { InjectionContainer } from "./InjectionContainer";
 
 class AxiosHttpClient implements IHttpClient {
   private _apiInstance: AxiosInstance;
@@ -11,14 +13,17 @@ class AxiosHttpClient implements IHttpClient {
    *
    * @param baseUrl Url will be used as prefix in all requests
    */
-  constructor(baseUrl?: string) {
+  constructor(
+    private _injectionContainer: InjectionContainer<ServicesTokens>,
+    baseUrl?: string
+  ) {
     this._apiInstance = axios.create({
       baseURL: baseUrl,
       headers: {
         common: {
-          'accept-encoding': '*'
-        }
-      }
+          "accept-encoding": "*",
+        },
+      },
     });
   }
 
