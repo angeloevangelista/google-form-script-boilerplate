@@ -1,6 +1,6 @@
 node_modules/
 .vscode/
 dist/
+debug/
 config.json
-debug-email.html
 .clasp.json

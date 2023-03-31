@@ -3,6 +3,7 @@ import { JiraService } from "../services";
 import { InjectionContainer } from "../services/InjectionContainer";
 import {
   IEncodingService,
+  IFileService,
   IHttpClient,
   IJiraService,
   ILogService,
@@ -14,7 +15,8 @@ type ServicesTokens =
   | "IHttpClient"
   | "IEncodingService"
   | "IJiraService"
-  | "IEmailService";
+  | "IEmailService"
+  | "IFileService";
 
 async function getInjectionContainer(): Promise<
   InjectionContainer<ServicesTokens>
@@ -29,19 +31,22 @@ async function getInjectionContainer(): Promise<
       NativeConsoleLogger,
       NativeEncodingService,
       FakeEmailService,
+      NativeFileService,
     } = await import("../services/for-node-modules");
 
     sharedInjectionContainer
       .register<IHttpClient>("IHttpClient", AxiosHttpService)
       .register<ILogService>("ILogService", NativeConsoleLogger)
       .register<IEncodingService>("IEncodingService", NativeEncodingService)
-      .register<IEmailService>("IEmailService", FakeEmailService);
+      .register<IEmailService>("IEmailService", FakeEmailService)
+      .register<IFileService>("IFileService", NativeFileService);
   } else {
     const {
       GoogleScriptsLogger,
       GoogleScriptsHttpClient,
       GoogleScriptsEncodingService,
       GoogleScriptsEmailService,
+      GoogleScriptsFileService,
     } = await import("../services/for-google-modules");
 
     sharedInjectionContainer
@@ -51,7 +56,8 @@ async function getInjectionContainer(): Promise<
         GoogleScriptsEncodingService
       )
       .register<ILogService>("ILogService", GoogleScriptsLogger)
-      .register<IEmailService>("IEmailService", GoogleScriptsEmailService);
+      .register<IEmailService>("IEmailService", GoogleScriptsEmailService)
+      .register<IFileService>("IFileService", GoogleScriptsFileService);
   }
 
   return sharedInjectionContainer;

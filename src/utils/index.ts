@@ -5,3 +5,4 @@ export * from "./getInjectionContainer";
 export * from "./deepCopy";
 export * from "./loadApplicationConfig";
 export * from "./isValidEmail";
+export * from "./getRandomString";
