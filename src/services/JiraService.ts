@@ -12,8 +12,8 @@ import {
   JiraError,
   JiraServiceResult,
   CustomFieldType,
-  Issuetype,
   IssueDescriptionContent,
+  JiraCodeBlockLanguagesType,
 } from "jira-service-types";
 
 class JiraService implements IJiraService {
@@ -285,6 +285,26 @@ class IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
   > {
     this._fieldsObject.description.content.push({
       type: "rule",
+    });
+
+    return this;
+  }
+
+  public addCodeBlock(
+    text: string,
+    language: JiraCodeBlockLanguagesType = "none"
+  ): IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
+    this._fieldsObject.description.content.push({
+      type: "codeBlock",
+      attrs: {
+        language,
+      },
+      content: [
+        {
+          type: "text",
+          text: text || " ",
+        },
+      ],
     });
 
     return this;

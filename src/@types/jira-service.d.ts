@@ -24,8 +24,8 @@ declare module "jira-service-types" {
   export type IssueFields = {
     summary: string;
     project: IssueProject;
-    components?: Issuetype[];
-    issuetype: Issuetype;
+    components?: IssueType[];
+    issuetype: IssueType;
     description: IssueDescription;
     status: IssueStatus;
     [key: `customfield_${number}`]: CustomFieldType;
@@ -35,7 +35,7 @@ declare module "jira-service-types" {
     key: string;
   };
 
-  export type Issuetype = {
+  export type IssueType = {
     name: string;
   };
 
@@ -52,19 +52,14 @@ declare module "jira-service-types" {
   };
 
   export type IssueDescriptionContent = {
-    type: "text" | "heading" | "rule" | "paragraph";
+    type: "text" | "heading" | "rule" | "paragraph" | "codeBlock";
     text?: string;
     content?: IssueDescriptionContent[];
     marks?: IssueDescriptionContentMark[];
     attrs?: {
-      level: number;
+      level?: number;
+      language?: JiraCodeBlockLanguagesType;
     };
-  };
-
-  export type IssueDescriptionContent = {
-    type: string;
-    text: string;
-    marks?: IssueDescriptionContentMark[];
   };
 
   export type IssueDescriptionContentMark = {
@@ -96,4 +91,84 @@ declare module "jira-service-types" {
     timeZone: string;
     locale: string;
   }
+
+  export type JiraCodeBlockLanguagesType =
+    | "none"
+    | "abap"
+    | "actionscript"
+    | "ada"
+    | "applescript"
+    | "arduino"
+    | "autoit"
+    | "c"
+    | "c++"
+    | "clojure"
+    | "coffeescript"
+    | "coldfusion"
+    | "csharp"
+    | "css"
+    | "cuda"
+    | "d"
+    | "dart"
+    | "diff"
+    | "elixir"
+    | "erlang"
+    | "fortran"
+    | "foxpro"
+    | "go"
+    | "graphql"
+    | "groovy"
+    | "haskell"
+    | "haxe"
+    | "html"
+    | "java"
+    | "javafx"
+    | "javascript"
+    | "json"
+    | "jsx"
+    | "julia"
+    | "kotlin"
+    | "livescript"
+    | "lua"
+    | "mathematica"
+    | "matlab"
+    | "objective-c"
+    | "objective-j"
+    | "ocaml"
+    | "octave"
+    | "pascal"
+    | "perl"
+    | "php"
+    | "plaintext"
+    | "powershell"
+    | "prolog"
+    | "puppet"
+    | "python"
+    | "qml"
+    | "r"
+    | "racket"
+    | "restructuredtext"
+    | "ruby"
+    | "rust"
+    | "sass"
+    | "scala"
+    | "scheme"
+    | "shell"
+    | "smalltalk"
+    | "splunkspl"
+    | "sql"
+    | "standardml"
+    | "swift"
+    | "tcl"
+    | "tex"
+    | "tsx"
+    | "typescript"
+    | "vala"
+    | "vbnet"
+    | "verilog"
+    | "vhdl"
+    | "visualbasic"
+    | "xml"
+    | "xquery"
+    | "yaml";
 }
