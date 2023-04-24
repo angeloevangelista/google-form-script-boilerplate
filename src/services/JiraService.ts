@@ -178,7 +178,6 @@ class IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
         version: 1,
         content: [],
       },
-      components: [],
       ...fieldsObject,
     } as IssueFields;
   }
@@ -248,6 +247,7 @@ class IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
     componentName: string
   ): IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
     if (!this._fieldsObject.components) {
+      this._fieldsObject.components = [];
     }
 
     this._fieldsObject.components?.push({
