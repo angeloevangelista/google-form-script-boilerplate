@@ -1,6 +1,2 @@
-node_modules/
-.vscode/
-dist/
 debug/
-config.json
 .clasp.json
