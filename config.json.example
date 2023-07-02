@@ -1,7 +1,0 @@
-{
-  "jira": {
-    "user": "string",
-    "token": "string",
-    "workspace": "string"
-  }
-}
