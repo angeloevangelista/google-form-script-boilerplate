@@ -15,8 +15,12 @@ function handleFormSubmit(submitEvent) {
     .closeParagraph()
     .addCodeBlock(
       "console.log('Feel free to also add some code here')",
-      'javascript',
+      "javascript"
     )
+    .addTodoList([
+      { text: "foo", checked: true },
+      { text: "bar", checked: false },
+    ])
     .getFieldsObject();
 
   const createIssueResponse = new JiraService().createIssue({
@@ -34,7 +38,7 @@ function handleFormSubmit(submitEvent) {
   sendNotificationEmail({
     to: "someone@email.com",
     issueKey,
-  })
+  });
 }
 
 function organizeAnswers(submitEvent) {
@@ -51,9 +55,9 @@ function sendNotificationEmail({ to, issueKey }) {
   const emailSubject = "You got a new issue!";
 
   const emailContent = [
-    '<h3>Hey, mate!</h3>',
+    "<h3>Hey, mate!</h3>",
     `Just created this for u <a href="${issueLink}" target="_blank">${issueKey}</a>`,
-  ].join('\n');
+  ].join("\n");
 
   MailApp.sendEmail({
     to,

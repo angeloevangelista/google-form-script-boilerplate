@@ -68,7 +68,10 @@ class JiraService {
   createIssue(createIssueParams) {
     try {
       const url = `${this._baseUrl}/issue`;
-      const response = UrlFetchApp.fetch(url, this.getOptions("POST", createIssueParams));
+      const response = UrlFetchApp.fetch(
+        url,
+        this.getOptions("POST", createIssueParams)
+      );
       const data = JSON.parse(response.getContentText());
 
       const result = {
@@ -204,8 +207,7 @@ class IssueFieldsHandler {
    * @param {string} customFieldId - The ID of the custom field.
    * @returns {any} The value of the custom field.
    */
-  getCustomField(customFieldId) {
-  }
+  getCustomField(customFieldId) {}
 
   /**
    * Sets the issue key.
@@ -334,6 +336,31 @@ class IssueFieldsHandler {
           text: text || " ",
         },
       ],
+    });
+
+    return this;
+  }
+
+  /**
+   * Adds a to-do list to the description.
+   * @param {Array<{ text: string, checked: boolean }>} items - The list of to-do items, each with text and checked state.
+   * @returns {IssueFieldsHandler} The current instance of IssueFieldsHandler.
+   */
+  addTodoList(items) {
+    this._fieldsObject.description.content.push({
+      type: "taskList",
+      content: items.map(({ text, checked }) => ({
+        type: "taskItem",
+        content: [
+          {
+            type: "text",
+            text,
+          },
+        ],
+        attrs: {
+          state: checked ? "DONE" : "TODO",
+        },
+      })),
     });
 
     return this;
