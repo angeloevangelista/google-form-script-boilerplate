@@ -195,6 +195,24 @@ class IssueFieldsHandler {
   }
 
   /**
+   * Generates a unique identifier (UUID).
+   *
+   * This method checks if the `crypto` API is available and uses its
+   * `randomUUID` method if it exists. Otherwise, it falls back to
+   * using the `Utilities.getUuid` method to generate a UUID.
+   *
+   * @returns {string} A randomly generated UUID.
+   */
+  generateUuid() {
+    const generator =
+      typeof crypto !== "undefined" && crypto?.randomUUID
+        ? crypto.randomUUID
+        : Utilities.getUuid;
+
+    return generator();
+  }
+
+  /**
    * Returns the fields object.
    * @returns {object} The fields object.
    */
@@ -349,6 +367,9 @@ class IssueFieldsHandler {
   addTodoList(items) {
     this._fieldsObject.description.content.push({
       type: "taskList",
+      attrs: {
+        localId: this.generateUuid(),
+      },
       content: items.map(({ text, checked }) => ({
         type: "taskItem",
         content: [
@@ -358,6 +379,7 @@ class IssueFieldsHandler {
           },
         ],
         attrs: {
+          localId: this.generateUuid(),
           state: checked ? "DONE" : "TODO",
         },
       })),
