@@ -14,6 +14,7 @@ import {
   CustomFieldType,
   IssueDescriptionContent,
   JiraCodeBlockLanguagesType,
+  JiraDescriptionTodoListItemType,
 } from "jira-service-types";
 
 class JiraService implements IJiraService {
@@ -305,6 +306,28 @@ class IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
           text: text || " ",
         },
       ],
+    });
+
+    return this;
+  }
+
+  public addTodoList(
+    items: JiraDescriptionTodoListItemType[]
+  ): IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
+    this._fieldsObject.description.content.push({
+      type: "taskList",
+      content: items.map(({ text, checked }) => ({
+        type: "taskItem",
+        content: [
+          {
+            type: "text",
+            text,
+          },
+        ],
+        attrs: {
+          state: checked ? "DONE" : "TODO",
+        },
+      })),
     });
 
     return this;

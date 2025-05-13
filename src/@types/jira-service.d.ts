@@ -51,14 +51,32 @@ declare module "jira-service-types" {
     id: string;
   };
 
+  export type JiraDescriptionTodoListContent = {
+    type: "text";
+    text: string;
+  };
+
+  export type JiraDescriptionTodoListItemType = {
+    text: string;
+    checked?: bool;
+  };
+
   export type IssueDescriptionContent = {
-    type: "text" | "heading" | "rule" | "paragraph" | "codeBlock";
+    type:
+      | "text"
+      | "heading"
+      | "rule"
+      | "paragraph"
+      | "codeBlock"
+      | "taskList"
+      | "taskItem";
     text?: string;
-    content?: IssueDescriptionContent[];
+    content?: IssueDescriptionContent[] | JiraDescriptionTodoListContent[];
     marks?: IssueDescriptionContentMark[];
     attrs?: {
       level?: number;
       language?: JiraCodeBlockLanguagesType;
+      state?: "DONE" | "TODO";
     };
   };
 
