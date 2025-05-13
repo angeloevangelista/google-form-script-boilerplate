@@ -183,6 +183,15 @@ class IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
     } as IssueFields;
   }
 
+  private generateUuid(): string {
+    const generator =
+      typeof crypto !== "undefined" && crypto?.randomUUID
+        ? crypto.randomUUID
+        : Utilities.getUuid;
+
+    return generator();
+  }
+
   public get issueKey(): string | undefined {
     return this._issueKey;
   }
@@ -316,6 +325,9 @@ class IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
   ): IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
     this._fieldsObject.description.content.push({
       type: "taskList",
+      attrs: {
+        localId: this.generateUuid(),
+      },
       content: items.map(({ text, checked }) => ({
         type: "taskItem",
         content: [
@@ -325,6 +337,7 @@ class IssueFieldsHandler<TCustomFieldsMap, TIssueType> {
           },
         ],
         attrs: {
+          localId: this.generateUuid(),
           state: checked ? "DONE" : "TODO",
         },
       })),

@@ -74,6 +74,7 @@ declare module "jira-service-types" {
     content?: IssueDescriptionContent[] | JiraDescriptionTodoListContent[];
     marks?: IssueDescriptionContentMark[];
     attrs?: {
+      localId?: string;
       level?: number;
       language?: JiraCodeBlockLanguagesType;
       state?: "DONE" | "TODO";
